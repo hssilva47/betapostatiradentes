@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apostas</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0f331a; color: #f1f1f1; font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header { width: 100%; display: flex; justify-content: space-between; padding: 10px; background-color: #1a472a; }
+        .container { width: 350px; padding: 20px; background-color: #2a5a2a; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); text-align: center; margin-top: 20px; }
+        .multiplicadores { display: flex; justify-content: space-around; margin: 20px 0; }
+        .multiplicador { padding: 10px 20px; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; transition: background-color 0.3s; }
+        .multiplicador.verde { background-color: green; }
+        .multiplicador.amarela { background-color: yellow; color: black; }
+        .multiplicador.vermelha { background-color: red; }
+        .multiplicador:hover { opacity: 0.8; }
+        #confirmarAposta { display: none; width: 100%; padding: 10px; margin-top: 10px; background-color: #ff4500; border: none; border-radius: 5px; color: #fff; font-size: 16px; cursor: pointer; }
+        #confirmarAposta:hover { background-color: #e03d00; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="moedas">💰 <span id="moedas"></span></div>
+        <div class="user-info">👤 <span id="userNomeHeader"></span></div>
+    </div>
+
+    <div class="container">
+        <h2>Bem-vindo, <span id="userNome"></span>!</h2>
+        <input type="number" id="valorAposta" placeholder="Valor da aposta" min="1">
+        <div class="multiplicadores">
+            <div class="multiplicador verde" onclick="selecionarAposta('vitoria', 2)">2.0x</div>
+            <div class="multiplicador amarela" onclick="selecionarAposta('empate', 1.5)">1.5x</div>
+            <div class="multiplicador vermelha" onclick="selecionarAposta('derrota', 1.2)">1.2x</div>
+        </div>
+        <button id="confirmarAposta" onclick="apostar()">Confirmar Aposta</button>
+        <p class="info" id="resultado"></p>
+    </div>
+
+    <script>
+        let moedas = parseInt(localStorage.getItem('moedas')) || 100;
+        let apostaEscolhida = '';
+        let multiplicador = 1;
+
+        function selecionarAposta(tipo, taxa) {
+            apostaEscolhida = tipo;
+            multiplicador = taxa;
+            document.getElementById('confirmarAposta').style.display = 'block';
+        }
+
+        function apostar() {
+            const valorAposta = parseInt(document.getElementById('valorAposta').value);
+            if (isNaN(valorAposta) || valorAposta <= 0) {
+                alert('Digite um valor válido para aposta.');
+                return;
+            }
+            if (valorAposta > moedas) {
+                alert('Você não possui moedas suficientes.');
+                return;
+            }
+            
+            const aleatorio = Math.random();
+            let resultadoFinal = aleatorio < 0.33 ? 'vitoria' : aleatorio < 0.66 ? 'empate' : 'derrota';
+            document.getElementById('resultado').innerText = 'Resultado: ' + resultadoFinal.toUpperCase();
+            
+            if (apostaEscolhida === resultadoFinal) {
+                moedas += valorAposta * (multiplicador - 1);
+                alert(`Parabéns! Você ganhou! Seu saldo agora é ${moedas}`);
+            } else {
+                moedas -= valorAposta * multiplicador;
+                alert(`Que pena! Você perdeu! Seu saldo agora é ${moedas}`);
+            }
+
+            localStorage.setItem('moedas', moedas);
+            document.getElementById('moedas').innerText = moedas;
+            document.getElementById('confirmarAposta').style.display = 'none';
+        }
+
+        window.onload = function () {
+            const nomeSalvo = localStorage.getItem('userNome');
+            if (!nomeSalvo) {
+                window.location.href = "login.html";
+                return;
+            }
+            document.getElementById('userNome').innerText = nomeSalvo;
+            document.getElementById('userNomeHeader').innerText = nomeSalvo;
+            document.getElementById('moedas').innerText = moedas;
+        };
+    </script>
+</body>
+</html>
+
